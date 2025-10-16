@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 func commonHeaders(next http.Handler) http.Handler {
@@ -27,6 +28,10 @@ func (app *application) logRequest(next http.Handler) http.Handler {
 			method = r.Method
 			uri    = r.RequestURI
 		)
+		// Trim the port from RemoteAddr if present (e.g. "127.0.0.1:54321").
+		if i := strings.LastIndex(ip, ":"); i != -1 {
+			ip = ip[:i]
+		}
 		app.logger.Info("received request", "ip", ip, "proto", proto, "method", method, "uri", uri)
 		next.ServeHTTP(w, r)
 	})
@@ -43,7 +48,7 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 				w.Header().Set("Connection", "close")
 				// Call the app.serverError helper method to return a 500
 				// Internal Server response.
-				app.serverError(w, r, fmt.Errorf("%s", err))
+				app.serverError(w, r, fmt.Errorf("%v", err))
 			}
 		}()
 		next.ServeHTTP(w, r)

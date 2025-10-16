@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-playground/form/v4" // New import
 	_ "github.com/go-sql-driver/mysql"
 	"the_Elir.net/internal/models"
 )
@@ -16,6 +17,7 @@ type application struct {
 	logger        *slog.Logger
 	snippets      *models.SnippetModel
 	templateCache map[string]*template.Template
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -31,18 +33,20 @@ func main() {
 		os.Exit(1)
 	}
 	defer db.Close()
-	app := &application{
-		logger:   logger,
-		snippets: &models.SnippetModel{DB: db},
-	}
 
-	// Create a template cache and add to the application struct
 	templateCache, err := newTemplateCache()
+	formDecoder := form.NewDecoder()
+	app := &application{
+		logger:        logger,
+		snippets:      &models.SnippetModel{DB: db},
+		templateCache: templateCache,
+		formDecoder:   formDecoder,
+	}
+	// Create a template cache and add to the application struct
 	if err != nil {
 		logger.Error("unable to create template cache", "err", err)
 		os.Exit(1)
 	}
-	app.templateCache = templateCache
 
 	logger.Info("Starting server", "addr", *addr)
 	err = http.ListenAndServe(*addr, app.routes())
