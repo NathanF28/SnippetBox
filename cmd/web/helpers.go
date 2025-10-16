@@ -52,6 +52,7 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, status in
 func (app *application) newTemplateData(r *http.Request) templateData {
 	return templateData{
 		CurrentYear: time.Now().Year(),
+		Flash:       app.sessionManager.PopString(r.Context(), "flash"),
 	}
 }
 
@@ -62,6 +63,8 @@ func (app *application) decodePostForm(r *http.Request, dst any) error {
 	if err != nil {
 		return err
 	}
+	// DEBUG: log content type and parsed form values
+	app.logger.Info("parse form", "content-type", r.Header.Get("Content-Type"), "postForm", r.PostForm)
 	// Call Decode() on our decoder instance, passing the target destination as
 	// the first parameter.
 	err = app.formDecoder.Decode(dst, r.PostForm)

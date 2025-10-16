@@ -6,18 +6,22 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
-	"os"
+	"os" // New import
+	"time"
 
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"    // New import
 	"github.com/go-playground/form/v4" // New import
 	_ "github.com/go-sql-driver/mysql"
 	"the_Elir.net/internal/models"
 )
 
 type application struct {
-	logger        *slog.Logger
-	snippets      *models.SnippetModel
-	templateCache map[string]*template.Template
-	formDecoder   *form.Decoder
+	logger         *slog.Logger
+	snippets       *models.SnippetModel
+	templateCache  map[string]*template.Template
+	formDecoder    *form.Decoder
+	sessionManager *scs.SessionManager
 }
 
 func main() {
@@ -36,11 +40,16 @@ func main() {
 
 	templateCache, err := newTemplateCache()
 	formDecoder := form.NewDecoder()
+	sessionManager := scs.New()               // new instance
+	sessionManager.Store = mysqlstore.New(db) // where its stored
+	sessionManager.Lifetime = 12 * time.Hour  // lifetime
+
 	app := &application{
-		logger:        logger,
-		snippets:      &models.SnippetModel{DB: db},
-		templateCache: templateCache,
-		formDecoder:   formDecoder,
+		logger:         logger,
+		snippets:       &models.SnippetModel{DB: db},
+		templateCache:  templateCache,
+		formDecoder:    formDecoder,
+		sessionManager: sessionManager,
 	}
 	// Create a template cache and add to the application struct
 	if err != nil {
