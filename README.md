@@ -42,24 +42,13 @@ A simple Go web application for storing and sharing code snippets.
 - Click "Create Snippet" to add a new snippet.
 - View, share, and browse snippets.
 
-## Screenshots
-
-### Home Page
-![Home Page](ui/static/img/screenshot-home.png)
-
-### Create Snippet
-![Create Snippet](ui/static/img/screenshot-create.png)
-
-### View Snippet
-![View Snippet](ui/static/img/screenshot-view.png)
-
-> To add your own screenshots, save them as `screenshot-home.png`, `screenshot-create.png`, and `screenshot-view.png` in `ui/static/img/`.
 
 ## Project Structure
 ```
 go.mod
 cmd/web/         # Main web app (handlers, routes, templates)
 internal/models/ # Data models (snippets, users)
+
 internal/validator/ # Form validation helpers
 ui/html/         # HTML templates
 ui/static/       # CSS, images, JS
